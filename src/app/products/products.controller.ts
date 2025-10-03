@@ -1,4 +1,25 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ProductsService } from './products.service';
 
 @Controller('products')
-export class ProductsController {}
+export class ProductsController {
+  constructor(private readonly productsService: ProductsService) {}
+  @Get()
+  async findAll(
+    @Query('title') title?: string,
+    @Query('price_min') price_min?: number,
+    @Query('price_max') price_max?: number,
+    @Query('categoryId') categoryId?: string,
+    @Query('limit') limit = 10,
+    @Query('offset') offset = 0,
+  ) {
+    return await this.productsService.findAll({
+      title,
+      categoryId,
+      price_min,
+      price_max,
+      limit,
+      offset,
+    });
+  }
+}

@@ -1,19 +1,44 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ApiConnection } from 'src/utils/api-connection.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly apiService: ApiConnection,
+  ) {}
 
-  async findAll() {
-    return this.prisma.product.findMany();
+  async findAll(params: {
+    title?: string;
+    categoryId?: string;
+    price_min?: number;
+    price_max?: number;
+    limit: number;
+    offset: number;
+  }) {
+    const { categoryId, price_min, price_max, limit, offset, title } = params;
+
+    const apiProducts = await this.apiService.findAllProducts({
+      title: title,
+      categoryId: categoryId ? parseInt(categoryId) : undefined,
+      price_min,
+      price_max,
+      limit,
+      offset,
+    });
+
+    if (!apiProducts || apiProducts.length === 0) {
+      throw new Error('No products found from external API');
+    }
+    return apiProducts;
   }
 
   async findOne(id: string) {
-    return this.prisma.product.findUnique({ where: { id } });
-  }
-
-  async findByCategory(categoryId: string) {
-    return this.prisma.product.findMany({ where: { categoryId } });
+    const product = await this.apiService.findProductById(id);
+    if (!product) {
+      throw new Error(`Product with ID ${id} not found`);
+    }
+    return product;
   }
 }
