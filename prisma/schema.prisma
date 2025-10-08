@@ -25,7 +25,9 @@ model Category {
 
 model Product {
   id          String   @id @default(cuid())
+  externalId  String   @unique
   name        String
+  quantity   Int      @default(1)
   description String?
   image       String?
   price       Int
@@ -62,6 +64,7 @@ model CartItem {
   id        String   @id @default(cuid())
   cartId   String
   productId String
+  price     Int
   quantity  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

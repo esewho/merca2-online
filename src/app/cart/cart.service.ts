@@ -9,33 +9,77 @@ export class CartService {
     private readonly apiService: ApiConnection,
   ) {}
   async getCartByUserId(userId: string) {
-    const cart = await this.prismaService.cart.findUnique({
+    return await this.prismaService.cart.upsert({
       where: { userId },
+      create: { user: { connect: { id: userId } }, total: 0 },
+      update: {},
     });
-    if (!cart) {
-      return await this.prismaService.cart.create({
-        data: { userId, total: 0 },
-      });
-    } else {
-      return cart;
-    }
   }
 
-  async addProductToCart(userId: string, productId: string, quantity: number) {
+  async addProductToCart(userId: string, externalId: string, quantity: number) {
+    if (quantity <= 0) {
+      throw new Error('You cant add a negative quantity');
+    }
     const cart = await this.getCartByUserId(userId);
-    const product = await this.apiService.findProductById(productId);
-    if (!product) {
+    const apiProduct = await this.apiService.findProductById(externalId);
+    if (!apiProduct) {
       throw new Error('Product not found');
     }
-    if (quantity <= 0) {
-      throw new Error('Quantity must be greater than zero');
-    }
-    const totalToAdd = product.price * quantity;
-    const updateCart = await this.prismaService.cart.update({
-      where: { id: cart.id },
-      data: { total: cart.total + totalToAdd },
+    const categoryName = String(apiProduct.category.name ?? 'Otros');
+    const name = apiProduct.title ?? 'Producto';
+    const description = apiProduct.description ?? '';
+    const price = apiProduct.price ?? 0;
+    const image = apiProduct.image ?? '';
+
+    const updatedCart = await this.prismaService.$transaction(async (tx) => {
+      const category = await tx.category.upsert({
+        where: { name: categoryName },
+        create: { name: categoryName },
+        update: {},
+      });
+
+      const product = await tx.product.upsert({
+        where: { externalId },
+        create: {
+          name,
+          externalId,
+          description,
+          price,
+          image,
+          categoryId: category.id,
+        },
+        update: {
+          name,
+          description,
+          price,
+          image,
+          categoryId: category.id,
+        },
+      });
+      await tx.cartItem.upsert({
+        where: { cartId_productId: { cartId: cart.id, productId: product.id } },
+        create: {
+          cartId: cart.id,
+          productId: product.id,
+          quantity,
+          price: product.price,
+        },
+        update: { quantity: { increment: quantity, decrement: quantity } },
+      });
+      const items = await tx.cartItem.findMany({
+        where: { cartId: cart.id },
+        select: { price: true, quantity: true },
+      });
+      const newTotal = items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0,
+      );
+      return await tx.cart.update({
+        where: { id: cart.id },
+        data: { total: newTotal },
+      });
     });
-    return updateCart;
+    return updatedCart;
   }
 
   async removeProductFromCart(
