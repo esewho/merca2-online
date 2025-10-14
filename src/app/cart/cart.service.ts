@@ -16,6 +16,15 @@ export class CartService {
     });
   }
 
+  async getCartWithItems(userId: string) {
+    const cart = await this.getCartByUserId(userId);
+    console.log(cart.id, 'aqui esta el carrito del usuario!!!!');
+    return this.prismaService.cart.findUnique({
+      where: { id: cart.id },
+      include: { items: { include: { product: true } } },
+    });
+  }
+
   async addProductToCart(userId: string, externalId: string, quantity: number) {
     if (quantity <= 0) {
       throw new Error('You cant add a negative quantity');
@@ -45,14 +54,14 @@ export class CartService {
           externalId,
           description,
           price,
-          image,
+          image: image,
           categoryId: category.id,
         },
         update: {
           name,
           description,
           price,
-          image,
+          image: image,
           categoryId: category.id,
         },
       });
@@ -64,7 +73,7 @@ export class CartService {
           quantity,
           price: product.price,
         },
-        update: { quantity: { increment: quantity, decrement: quantity } },
+        update: { quantity: { increment: quantity } },
       });
       const items = await tx.cartItem.findMany({
         where: { cartId: cart.id },
