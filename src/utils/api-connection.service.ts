@@ -11,16 +11,19 @@ export class ApiConnection {
   async findAllProducts(params: {
     title?: string;
     price_min?: number;
+    price?: number;
     price_max?: number;
     categoryId?: number;
     limit?: number;
     offset?: number;
   }): Promise<ProductDto[]> {
-    const { title, price_min, price_max, categoryId, limit, offset } = params;
+    const { title, price_min, price_max, categoryId, limit, offset, price } =
+      params;
 
     const query = new URLSearchParams({
       ...(title ? { title } : {}),
       ...(price_min ? { price_min: price_min.toString() } : {}),
+      ...(price ? { price: price.toString() } : {}),
       ...(price_max ? { price_max: price_max.toString() } : {}),
       ...(categoryId ? { categoryId: categoryId.toString() } : {}),
       ...(limit ? { limit: limit.toString() } : {}),

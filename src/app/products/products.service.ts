@@ -13,16 +13,19 @@ export class ProductsService {
     title?: string;
     categoryId?: string;
     price_min?: number;
+    price?: number;
     price_max?: number;
     limit: number;
     offset: number;
   }) {
-    const { categoryId, price_min, price_max, limit, offset, title } = params;
+    const { categoryId, price_min, price_max, limit, offset, title, price } =
+      params;
 
     const apiProducts = await this.apiService.findAllProducts({
       title: title,
       categoryId: categoryId ? parseInt(categoryId) : undefined,
       price_min,
+      price,
       price_max,
       limit,
       offset,

@@ -8,6 +8,7 @@ export class ProductsController {
   async findAll(
     @Query('title') title?: string,
     @Query('price_min') price_min?: number,
+    @Query('price') price?: number,
     @Query('price_max') price_max?: number,
     @Query('categoryId') categoryId?: string,
     @Query('limit') limit = 10,
@@ -17,6 +18,7 @@ export class ProductsController {
       title,
       categoryId,
       price_min,
+      price,
       price_max,
       limit,
       offset,
