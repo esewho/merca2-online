@@ -12,6 +12,7 @@ import { CartService } from './cart.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserId } from '../common/decorators/user-id.decorator';
 import { ChangeQtyDto } from 'src/dtos/change-qty.dto';
+import { AddToCartDto } from 'src/dtos/add-to-cart.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('cart')
@@ -24,12 +25,12 @@ export class CartController {
   }
 
   @Post('items')
-  async addItem(
-    @UserId() userId: string,
-    @Param('externalId') externalId: string,
-    @Body() dto: ChangeQtyDto,
-  ) {
-    return await this.cart.addProductToCart(userId, externalId, dto.quantity);
+  async addItem(@UserId() userId: string, @Body() dto: AddToCartDto) {
+    return await this.cart.addProductToCart(
+      userId,
+      dto.externalId,
+      dto.quantity,
+    );
   }
 
   @Put('items/:externalId')

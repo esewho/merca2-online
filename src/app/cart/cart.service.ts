@@ -21,7 +21,9 @@ export class CartService {
     console.log(cart.id, 'aqui esta el carrito del usuario!!!!');
     return this.prismaService.cart.findUnique({
       where: { id: cart.id },
-      include: { items: { include: { product: true } } },
+      include: {
+        items: { include: { product: { include: { category: true } } } },
+      },
     });
   }
 
@@ -38,7 +40,7 @@ export class CartService {
     const name = apiProduct.title ?? 'Producto';
     const description = apiProduct.description ?? '';
     const price = apiProduct.price ?? 0;
-    const image = apiProduct.image ?? '';
+    const images = apiProduct.images ?? undefined;
 
     const updatedCart = await this.prismaService.$transaction(async (tx) => {
       const category = await tx.category.upsert({
@@ -54,14 +56,18 @@ export class CartService {
           externalId,
           description,
           price,
-          image: image,
+          images: {
+            set: images,
+          },
           categoryId: category.id,
         },
         update: {
           name,
           description,
           price,
-          image: image,
+          images: {
+            set: images,
+          },
           categoryId: category.id,
         },
       });

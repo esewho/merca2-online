@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable } from '@nestjs/common';
+import { CategoryDto } from 'src/dtos/category.dto';
 import { ProductDto } from 'src/dtos/product.dto';
 
 @Injectable()
 export class ApiConnection {
   static readonly API_URL =
-    process.env.API_URL || 'https://api.escuelajs.co/api/v1/products';
+    process.env.API_URL || 'https://api.escuelajs.co/api/v1';
 
   async findAllProducts(params: {
     title?: string;
@@ -30,7 +31,7 @@ export class ApiConnection {
       ...(offset ? { offset: offset.toString() } : {}),
     });
 
-    const response = await fetch(`${ApiConnection.API_URL}?${query}`, {
+    const response = await fetch(`${ApiConnection.API_URL}/products?${query}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -42,12 +43,26 @@ export class ApiConnection {
   }
 
   async findProductById(id: string): Promise<ProductDto | null> {
-    const response = await fetch(`${ApiConnection.API_URL}/${id}`);
+    const response = await fetch(`${ApiConnection.API_URL}/products/${id}`);
     if (response.status === 404) {
       return null;
     }
     if (!response.ok) {
+      console.log(response);
       throw new Error('Failed to fetch product from external API');
+    }
+    const data = await response.json();
+    return data;
+  }
+
+  async findAllCategories(): Promise<CategoryDto[]> {
+    const response = await fetch(`${ApiConnection.API_URL}/categories`);
+    if (response.status === 404) {
+      throw new Error('Category not found');
+    }
+    if (!response.ok) {
+      console.log(response);
+      throw new Error('Failed to fetch categories from external API');
     }
     const data = await response.json();
     return data;

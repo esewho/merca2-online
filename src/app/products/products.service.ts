@@ -22,7 +22,7 @@ export class ProductsService {
       params;
 
     const apiProducts = await this.apiService.findAllProducts({
-      title: title,
+      title,
       categoryId: categoryId ? parseInt(categoryId) : undefined,
       price_min,
       price,

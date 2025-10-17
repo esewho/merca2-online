@@ -1,11 +1,10 @@
+import { CategoryDto } from './category.dto';
+
 export class ProductDto {
   title: string;
   externalId: string;
   price: number;
   description: string;
-  image: string;
-  category: {
-    name: string;
-    image: string;
-  };
+  images: string[];
+  category: CategoryDto;
 }
