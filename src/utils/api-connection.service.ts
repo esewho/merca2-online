@@ -44,6 +44,7 @@ export class ApiConnection {
 
   async findProductById(id: string): Promise<ProductDto | null> {
     const response = await fetch(`${ApiConnection.API_URL}/products/${id}`);
+    console.log(response, 'response in findProductById');
     if (response.status === 404) {
       return null;
     }
