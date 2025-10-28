@@ -14,4 +14,11 @@ export class AuthController {
   async login(@Body() dto: User): Promise<{ accessToken: string }> {
     return await this.authService.login(dto);
   }
+
+  @Post('login-guest')
+  async loginGuest(
+    @Body('guestId') guestId: string,
+  ): Promise<{ accessToken: string }> {
+    return await this.authService.loginGuest(guestId);
+  }
 }

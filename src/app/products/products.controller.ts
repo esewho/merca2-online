@@ -26,7 +26,7 @@ export class ProductsController {
   }
 
   @Get(':id')
-  async findById(@Param('externalId') id: string) {
+  async findById(@Param('id') id: string) {
     return await this.productsService.findOne(id);
   }
 }

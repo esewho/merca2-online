@@ -6,15 +6,15 @@ import {
   Param,
   Post,
   Put,
-  UseGuards,
+  // UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+// import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserId } from '../common/decorators/user-id.decorator';
 import { ChangeQtyDto } from 'src/dtos/change-qty.dto';
 import { AddToCartDto } from 'src/dtos/add-to-cart.dto';
 
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @Controller('cart')
 export class CartController {
   constructor(private readonly cart: CartService) {}
@@ -33,15 +33,15 @@ export class CartController {
     );
   }
 
-  @Put('items/:externalId')
+  @Put('items/:productId')
   async removeItem(
     @UserId() userId: string,
-    @Param('externalId') externalId: string,
+    @Param('productId') productId: string,
     @Body() dto: ChangeQtyDto,
   ) {
     return await this.cart.removeProductFromCart(
       userId,
-      externalId,
+      productId,
       dto.quantity,
     );
   }

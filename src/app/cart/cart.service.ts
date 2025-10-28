@@ -11,7 +11,7 @@ export class CartService {
   async getCartByUserId(userId: string) {
     return await this.prismaService.cart.upsert({
       where: { userId },
-      create: { user: { connect: { id: userId } }, total: 0 },
+      create: { user: { connect: { id: userId } } },
       update: {},
     });
   }
@@ -77,21 +77,13 @@ export class CartService {
           cartId: cart.id,
           productId: product.id,
           quantity,
-          price: product.price,
         },
         update: { quantity: { increment: quantity } },
       });
-      const items = await tx.cartItem.findMany({
-        where: { cartId: cart.id },
-        select: { price: true, quantity: true },
-      });
-      const newTotal = items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0,
-      );
+
       return await tx.cart.update({
         where: { id: cart.id },
-        data: { total: newTotal },
+        data: {},
       });
     });
     return updatedCart;
@@ -100,32 +92,50 @@ export class CartService {
   async removeProductFromCart(
     userId: string,
     productId: string,
-    quantity: number,
+    quantity?: number,
   ) {
     const cart = await this.getCartByUserId(userId);
-    const product = await this.apiService.findProductById(productId);
+    const product = await this.prismaService.product.findUnique({
+      where: { id: productId },
+    });
     if (!product) {
       throw new Error('Product not found');
     }
-    if (quantity <= 0) {
-      throw new Error('You cant remove a negative quantity');
-    }
-    const totalToRemove = product.price * quantity;
-    if (cart.total - totalToRemove < 0) {
-      throw new Error('You cant remove more than the cart total');
-    }
-    const updateCart = await this.prismaService.cart.update({
-      where: { id: cart.id },
-      data: { total: cart.total - totalToRemove },
+
+    const cartItem = await this.prismaService.cartItem.findUnique({
+      where: {
+        cartId_productId: {
+          cartId: cart.id,
+          productId: product.id,
+        },
+      },
     });
-    return updateCart;
+    if (!cartItem) {
+      throw new Error('Product not in cart');
+    }
+    if (!quantity || quantity <= 0) {
+      return await this.prismaService.cartItem.delete({
+        where: { id: cartItem.id },
+      });
+    }
+    if (quantity < cartItem.quantity) {
+      const updatedCart = await this.prismaService.cartItem.update({
+        where: { id: cartItem.id },
+        data: { quantity: cartItem.quantity - quantity },
+      });
+      return updatedCart;
+    } else {
+      return await this.prismaService.cartItem.delete({
+        where: { id: cartItem.id },
+      });
+    }
   }
 
   async clearCart(userId: string) {
     const cart = await this.getCartByUserId(userId);
     const updateCart = await this.prismaService.cart.update({
       where: { id: cart.id },
-      data: { total: 0 },
+      data: { items: { deleteMany: {} } },
     });
     return updateCart;
   }

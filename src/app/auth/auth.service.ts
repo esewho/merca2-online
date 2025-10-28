@@ -36,7 +36,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { name: dto.name },
     });
-    if (!user) {
+    if (!user || !user.password || !user.email) {
       throw new BadRequestException('User does not exist');
     }
 
@@ -48,7 +48,21 @@ export class AuthService {
     return { accessToken: await this.signToken(user.id, user.email) };
   }
 
-  private async signToken(userId: string, email: string) {
+  async loginGuest(guestId: string) {
+    let user = await this.prisma.user.findUnique({
+      where: { guestId },
+    });
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: { guestId },
+      });
+    }
+
+    return { accessToken: await this.signToken(user.id) };
+  }
+
+  private async signToken(userId: string, email?: string | null) {
     const payload = { sub: userId, email };
     const accessToken = await this.jwt.signAsync(payload);
     return accessToken;

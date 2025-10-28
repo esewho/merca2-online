@@ -30,7 +30,8 @@ export class ApiConnection {
       ...(limit ? { limit: limit.toString() } : {}),
       ...(offset ? { offset: offset.toString() } : {}),
     });
-
+    console.log(categoryId, 'categoryId in api-connection');
+    console.log(query);
     const response = await fetch(`${ApiConnection.API_URL}/products?${query}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -41,7 +42,6 @@ export class ApiConnection {
     const data = await response.json();
     return data;
   }
-
   async findProductById(id: string): Promise<ProductDto | null> {
     const response = await fetch(`${ApiConnection.API_URL}/products/${id}`);
     console.log(response, 'response in findProductById');

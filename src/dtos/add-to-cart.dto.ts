@@ -7,4 +7,6 @@ export class AddToCartDto {
   @IsInt()
   @Min(1)
   quantity: number;
+  @IsString()
+  image: string;
 }
