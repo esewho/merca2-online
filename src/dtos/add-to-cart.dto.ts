@@ -1,12 +1,11 @@
-import { IsInt, IsString, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class AddToCartDto {
   @IsString()
   externalId: string;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
-  quantity: number;
-  @IsString()
-  image: string;
+  quantity?: number | 1;
 }
