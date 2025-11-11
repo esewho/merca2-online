@@ -104,7 +104,18 @@ export class CartService {
       const cartItem = await tx.cartItem.findUnique({
         where: { cartId_productId: { cartId: cart.id, productId } },
       });
-      if (!cartItem) throw new Error('Product not in cart');
+      if (!cartItem) {
+        await tx.cartItem.upsert({
+          where: { cartId_productId: { cartId: cart.id, productId } },
+          create: {
+            cartId: cart.id,
+            productId,
+            quantity,
+          },
+          update: { quantity: { set: quantity } },
+        });
+        return;
+      }
 
       if (quantity === 0) {
         // borrar línea entera
@@ -113,7 +124,7 @@ export class CartService {
         // actualizar unidades
         await tx.cartItem.update({
           where: { id: cartItem.id },
-          data: { quantity },
+          data: { quantity: { increment: 1 } },
         });
       }
 
@@ -135,6 +146,7 @@ export class CartService {
       });
     });
   }
+
   async removeProductFromCart(
     userId: string,
     productIdOrExternalId: string,

@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Put,
   UseGuards,
@@ -37,7 +36,7 @@ export class CartController {
     @Body() dto: { quantity?: number },
   ) {
     const qty = dto.quantity ?? 1;
-    return this.cart.changeQuantity(userId, productId, +qty);
+    return this.cart.changeQuantity(userId, productId, qty);
   }
 
   @Put('items/:productId/decrement')
@@ -48,7 +47,7 @@ export class CartController {
   ) {
     const qty = Math.max(1, dto.quantity ?? 1);
 
-    return this.cart.changeQuantity(userId, productId, qty);
+    return this.cart.removeProductFromCart(userId, productId, qty);
   }
 
   @Post('items')

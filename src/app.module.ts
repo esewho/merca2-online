@@ -4,6 +4,7 @@ import { CategoriesModule } from './app/categories/categories.module';
 import { AuthModule } from './app/auth/auth.module';
 import { ProductsModule } from './app/products/products.module';
 import { CartModule } from './app/cart/cart.module';
+import { ProfileModule } from './app/profile/profile.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { CartModule } from './app/cart/cart.module';
     AuthModule,
     ProductsModule,
     CartModule,
+    ProfileModule,
   ],
   controllers: [],
   providers: [],
