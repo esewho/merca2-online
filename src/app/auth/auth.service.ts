@@ -17,7 +17,14 @@ export class AuthService {
       where: { email: dto.email },
     });
     if (existingUser) {
-      throw new BadRequestException('User already exists');
+      throw new BadRequestException('This email is already registered');
+    }
+
+    const existingUserName = await this.prisma.user.findUnique({
+      where: { name: dto.name },
+    });
+    if (existingUserName) {
+      throw new BadRequestException('Username already taken');
     }
 
     const hahshedPassword = await bcrypt.hash(dto.password, 10);
