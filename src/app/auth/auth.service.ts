@@ -29,23 +29,29 @@ export class AuthService {
       },
       select: { id: true, email: true, name: true },
     });
-    return { accessToken: await this.signToken(user.id, user.email) };
+    return {
+      accessToken: await this.signToken(user.id, user.email),
+    };
   }
 
   async login(dto: UserLogin) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
+    console.log('////////////////////', user);
     if (!user || !user.password || !user.email) {
       throw new BadRequestException('User does not exist');
     }
 
     const passwordMatches = await bcrypt.compare(dto.password, user.password);
+    console.log(passwordMatches);
     if (!passwordMatches) {
       throw new BadRequestException('Invalid credentials');
     }
 
-    return { accessToken: await this.signToken(user.id, user.email) };
+    return {
+      accessToken: await this.signToken(user.id, user.email),
+    };
   }
 
   async loginGuest(guestId: string) {
@@ -59,10 +65,12 @@ export class AuthService {
       });
     }
 
-    return { accessToken: await this.signToken(user.id) };
+    return {
+      accessToken: await this.signToken(user.id, user.email),
+    };
   }
 
-  private async signToken(userId: string, email?: string | null) {
+  private async signToken(userId: string, email: string | null) {
     const payload = { sub: userId, email };
     const accessToken = await this.jwt.signAsync(payload);
     return accessToken;
