@@ -38,6 +38,7 @@ export class AuthService {
     });
     return {
       accessToken: await this.signToken(user.id, user.email),
+      user,
     };
   }
 
@@ -58,6 +59,7 @@ export class AuthService {
 
     return {
       accessToken: await this.signToken(user.id, user.email),
+      user,
     };
   }
 
