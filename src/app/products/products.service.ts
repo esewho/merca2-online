@@ -42,6 +42,6 @@ export class ProductsService {
     if (!product) {
       throw new Error(`Product with ID ${id} not found`);
     }
-    return product;
+    return { ...product, externalId: id };
   }
 }
