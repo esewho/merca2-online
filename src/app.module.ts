@@ -6,9 +6,11 @@ import { ProductsModule } from './app/products/products.module';
 import { CartModule } from './app/cart/cart.module';
 import { ProfileModule } from './app/profile/profile.module';
 import { StripeModule } from './stripe/stripe.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     CategoriesModule,
     AuthModule,

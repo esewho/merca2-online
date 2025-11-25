@@ -1,15 +1,20 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { StripeService } from './stripe.service';
+import { StripeItemDto } from 'src/dtos/stripe-item.dto';
 
 @Controller('payments')
 export class StripeController {
   constructor(private readonly stripeService: StripeService) {}
 
-  @Post('create-payment-intent')
-  async createPaymentIntent(
-    @Body('amount') amount: number,
-    @Body('currency') currency: 'eur' | 'usd',
+  @Post('create-checkout-session')
+  async createCheckoutSession(
+    @Req() req,
+    @Body('items') items: StripeItemDto[],
   ) {
-    return await this.stripeService.createPaymentIntent(amount, currency);
+    console.log(
+      'Received items for checkout session: ========================================================',
+      items,
+    );
+    return await this.stripeService.createCheckoutSession(items);
   }
 }
