@@ -37,7 +37,11 @@ export class AuthService {
       select: { id: true, email: true, name: true },
     });
     return {
-      accessToken: await this.signToken(user.id, user.email),
+      accessToken: await this.signToken({
+        sub: user.id,
+        email: user.email,
+        guest: false,
+      }),
       user,
     };
   }
@@ -58,7 +62,11 @@ export class AuthService {
     }
 
     return {
-      accessToken: await this.signToken(user.id, user.email),
+      accessToken: await this.signToken({
+        sub: user.id,
+        email: user.email,
+        guest: false,
+      }),
       user,
     };
   }
@@ -75,13 +83,17 @@ export class AuthService {
     }
 
     return {
-      accessToken: await this.signToken(user.id, user.email),
+      accessToken: await this.signToken({
+        sub: user.id,
+        guest: true,
+      }),
     };
   }
 
-  private async signToken(userId: string, email: string | null) {
-    const payload = { sub: userId, email };
-    const accessToken = await this.jwt.signAsync(payload);
-    return accessToken;
+  private async signToken(payload: any): Promise<string> {
+    return this.jwt.signAsync(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: '1h',
+    });
   }
 }
