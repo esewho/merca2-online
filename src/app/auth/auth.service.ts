@@ -71,29 +71,23 @@ export class AuthService {
     };
   }
 
-  async loginGuest(guestId: string) {
+  async guestLogin(guestId: string) {
     let user = await this.prisma.user.findUnique({
-      where: { guestId },
+      where: { id: guestId },
     });
-
     if (!user) {
       user = await this.prisma.user.create({
-        data: { guestId },
+        data: { id: guestId },
       });
     }
-
-    return {
-      accessToken: await this.signToken({
-        sub: user.id,
-        guest: true,
-      }),
-    };
+    const accessToken = await this.jwt.signAsync({
+      sub: user.id,
+      guest: true,
+    });
+    return { accessToken };
   }
 
   private async signToken(payload: any): Promise<string> {
-    return this.jwt.signAsync(payload, {
-      secret: process.env.JWT_SECRET,
-      expiresIn: '1h',
-    });
+    return this.jwt.signAsync(payload);
   }
 }

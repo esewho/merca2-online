@@ -20,6 +20,6 @@ export class AuthController {
   async loginGuest(
     @Body('guestId') guestId: string,
   ): Promise<{ accessToken: string }> {
-    return await this.authService.loginGuest(guestId);
+    return await this.authService.guestLogin(guestId);
   }
 }
